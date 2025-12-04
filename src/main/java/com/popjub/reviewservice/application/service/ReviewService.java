@@ -1,9 +1,15 @@
 package com.popjub.reviewservice.application.service;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.popjub.reviewservice.application.dto.command.CreateReviewCommand;
 import com.popjub.reviewservice.application.dto.result.CreateReviewResult;
+import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
 import com.popjub.reviewservice.domain.entity.Review;
 import com.popjub.reviewservice.domain.repository.ReviewRepository;
 
@@ -27,4 +33,12 @@ public class ReviewService {
 			.isBlind(saved.getIsBlind())
 			.build();
 	}
+
+	public Page<SearchReviewResult> getReviewsByUser(Long userId, Pageable pageable) {
+
+		Page<Review> reviews = reviewRepository.findAllByUserId(userId, pageable);
+
+		return reviews.map(SearchReviewResult::from);
+	}
+
 }

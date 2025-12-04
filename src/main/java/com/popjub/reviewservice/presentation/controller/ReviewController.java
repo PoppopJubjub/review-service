@@ -1,18 +1,32 @@
 package com.popjub.reviewservice.presentation.controller;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.popjub.common.response.ApiResponse;
 import com.popjub.common.enums.SuccessCode;
+import com.popjub.common.response.PageResponse;
 import com.popjub.reviewservice.application.dto.command.CreateReviewCommand;
 import com.popjub.reviewservice.application.dto.result.CreateReviewResult;
+import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
 import com.popjub.reviewservice.application.service.ReviewService;
 import com.popjub.reviewservice.presentation.dto.request.CreateReviewRequest;
 import com.popjub.reviewservice.presentation.dto.response.CreateReviewResponse;
+import com.popjub.reviewservice.presentation.dto.response.SearchReviewResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,5 +48,17 @@ public class ReviewController {
 		CreateReviewResponse response = CreateReviewResponse.from(result);
 
 		return ApiResponse.of(SuccessCode.CREATED, response);
+	}
+
+	@GetMapping
+	public ApiResponse<PageResponse<SearchReviewResponse>> getMyReview(
+		@RequestHeader("X-User-Id") Long userId,
+		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		Page<SearchReviewResult> result = reviewService.getReviewsByUser(userId, pageable);
+		Page<SearchReviewResponse> response = result.map(SearchReviewResponse::from);
+		PageResponse<SearchReviewResponse> pageResponse = PageResponse.from(response);
+
+		return ApiResponse.of(SuccessCode.OK, pageResponse);
 	}
 }

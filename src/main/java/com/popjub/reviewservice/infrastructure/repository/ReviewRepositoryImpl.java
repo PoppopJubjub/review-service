@@ -3,6 +3,8 @@ package com.popjub.reviewservice.infrastructure.repository;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.popjub.reviewservice.domain.entity.Review;
@@ -24,5 +26,10 @@ public class ReviewRepositoryImpl implements ReviewRepository {
 	@Override
 	public Optional<Review> findById(UUID id) {
 		return reviewJpaRepository.findById(id);
+	}
+
+	@Override
+	public Page<Review> findAllByUserId(Long userId, Pageable pageable) {
+		return reviewJpaRepository.findAllByUserId(userId, pageable);
 	}
 }
