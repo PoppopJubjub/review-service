@@ -1,0 +1,36 @@
+package com.popjub.reviewservice.application.service;
+
+import org.springframework.stereotype.Service;
+
+import com.popjub.reviewservice.application.dto.command.CreateReviewCommand;
+import com.popjub.reviewservice.application.dto.result.CreateReviewResult;
+import com.popjub.reviewservice.domain.entity.Review;
+import com.popjub.reviewservice.domain.repository.ReviewRepository;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class ReviewService {
+
+	private final ReviewRepository reviewRepository;
+
+	public CreateReviewResult createReview(CreateReviewCommand command) {
+
+		Review review = Review.of(
+			command.reservationId(),
+			command.userId(),
+			command.storeId(),
+			command.rating(),
+			command.content(),
+			command.imageUrl()
+		);
+
+		Review saved = reviewRepository.save(review);
+
+		return CreateReviewResult.builder()
+			.reviewId(saved.getReviewId())
+			.isBlind(saved.getIsBlind())
+			.build();
+	}
+}

@@ -1,0 +1,97 @@
+package com.popjub.reviewservice.domain.entity;
+
+import java.util.UUID;
+
+import jakarta.persistence.Id;
+
+import com.popjub.common.entity.BaseEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
+@Table(name = "p_review")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Review extends BaseEntity {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private UUID reviewId;
+
+	@Column(nullable = false)
+	private UUID reservationId;
+
+	@Column(nullable = false)
+	private Long userId;
+
+	@Column(nullable = false)
+	private UUID storeId;
+
+	@Column(nullable = false)
+	private Integer rating;
+
+	@Column(columnDefinition = "TEXT", nullable = false)
+	private String content;
+
+	@Column(length = 255)
+	private String imageUrl;
+
+	@Column(nullable = false)
+	private Integer reportCount = 0;
+
+	@Column(nullable = false)
+	private Boolean isBlind = false;
+
+	@Builder(access = AccessLevel.PRIVATE)
+	private Review(
+		UUID reservationId,
+		Long userId,
+		UUID storeId,
+		Integer rating,
+		String content,
+		String imageUrl
+	) {
+		this.reservationId = reservationId;
+		this.userId = userId;
+		this.storeId = storeId;
+		this.rating = rating;
+		this.content = content;
+		this.imageUrl = imageUrl;
+		this.reportCount = 0;
+		this.isBlind = false;
+	}
+
+	public static Review of(
+		UUID reservationId,
+		Long userId,
+		UUID storeId,
+		Integer rating,
+		String content,
+		String imageUrl
+	) {
+		return Review.builder()
+			.reservationId(reservationId)
+			.userId(userId)
+			.storeId(storeId)
+			.rating(rating)
+			.content(content)
+			.imageUrl(imageUrl)
+			.build();
+	}
+
+	public void report() {
+		this.reportCount += 1;
+	}
+
+	public void blind() {
+		this.isBlind = true;
+	}
+}
