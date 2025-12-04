@@ -18,14 +18,7 @@ public class ReviewService {
 	// status : checkIn, storeId 매칭, 중복 작성 불가
 	public CreateReviewResult createReview(CreateReviewCommand command) {
 
-		Review review = Review.of(
-			command.reservationId(),
-			command.userId(),
-			command.storeId(),
-			command.rating(),
-			command.content(),
-			command.imageUrl()
-		);
+		Review review = command.toEntity();
 
 		Review saved = reviewRepository.save(review);
 
