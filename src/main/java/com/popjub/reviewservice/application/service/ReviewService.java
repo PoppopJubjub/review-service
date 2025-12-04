@@ -1,0 +1,30 @@
+package com.popjub.reviewservice.application.service;
+
+import org.springframework.stereotype.Service;
+
+import com.popjub.reviewservice.application.dto.command.CreateReviewCommand;
+import com.popjub.reviewservice.application.dto.result.CreateReviewResult;
+import com.popjub.reviewservice.domain.entity.Review;
+import com.popjub.reviewservice.domain.repository.ReviewRepository;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class ReviewService {
+
+	private final ReviewRepository reviewRepository;
+	// 검증처리 구현해야함
+	// status : checkIn, storeId 매칭, 중복 작성 불가
+	public CreateReviewResult createReview(CreateReviewCommand command) {
+
+		Review review = command.toEntity();
+
+		Review saved = reviewRepository.save(review);
+
+		return CreateReviewResult.builder()
+			.reviewId(saved.getReviewId())
+			.isBlind(saved.getIsBlind())
+			.build();
+	}
+}
