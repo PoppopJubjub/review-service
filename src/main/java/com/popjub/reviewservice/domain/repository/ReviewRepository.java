@@ -19,4 +19,6 @@ public interface ReviewRepository {
 
 	Page<Review> findAllByUserId(Long userId, Pageable pageable);
 
+	Page<Review> findAllByStoreId(UUID storeId, Pageable pageable);
+
 }

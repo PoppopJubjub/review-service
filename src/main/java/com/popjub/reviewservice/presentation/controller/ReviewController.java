@@ -74,4 +74,21 @@ public class ReviewController {
 
 		return ApiResponse.of(SuccessCode.OK, response);
 	}
+
+	@GetMapping("/stores/{storeId}")
+	public ApiResponse<PageResponse<SearchReviewResponse>> getReviewsByStore(
+		@PathVariable UUID storeId,
+		@PageableDefault(
+			size = 50,
+			sort = "createdAt",
+			direction = Sort.Direction.DESC
+		) Pageable pageable
+	) {
+		Page<SearchReviewResult> result = reviewService.getReviewsByStoreId(storeId, pageable);
+		Page<SearchReviewResponse> response = result.map(SearchReviewResponse::from);
+		PageResponse<SearchReviewResponse> pageResponse = PageResponse.from(response);
+
+		return ApiResponse.of(SuccessCode.OK, pageResponse);
+	}
+
 }

@@ -37,4 +37,9 @@ public class ReviewRepositoryImpl implements ReviewRepository {
 	public Optional<Review> findByReviewIdAndUserId(UUID reviewId, Long userId) {
 		return reviewJpaRepository.findByReviewIdAndUserId(reviewId, userId);
 	}
+
+	@Override
+	public Page<Review> findAllByStoreId(UUID storeId, Pageable pageable) {
+		return reviewJpaRepository.findAllByStoreId(storeId, pageable);
+	}
 }

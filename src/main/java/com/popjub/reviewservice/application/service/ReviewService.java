@@ -48,4 +48,9 @@ public class ReviewService {
 
 		return SearchReviewResult.from(review);
 	}
+
+	public Page<SearchReviewResult> getReviewsByStoreId(UUID storeId, Pageable pageable) {
+		Page<Review> reviews = reviewRepository.findAllByStoreId(storeId, pageable);
+		return reviews.map(SearchReviewResult::from);
+	}
 }
