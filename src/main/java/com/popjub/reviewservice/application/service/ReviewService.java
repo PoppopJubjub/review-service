@@ -14,7 +14,8 @@ import lombok.RequiredArgsConstructor;
 public class ReviewService {
 
 	private final ReviewRepository reviewRepository;
-
+	// 검증처리 구현해야함
+	// status : checkIn, storeId 매칭, 중복 작성 불가
 	public CreateReviewResult createReview(CreateReviewCommand command) {
 
 		Review review = Review.of(
