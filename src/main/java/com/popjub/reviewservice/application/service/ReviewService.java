@@ -41,4 +41,11 @@ public class ReviewService {
 		return reviews.map(SearchReviewResult::from);
 	}
 
+	public SearchReviewResult getReviewById(Long userId, UUID reviewId) {
+		Review review = reviewRepository
+			.findByReviewIdAndUserId(reviewId, userId)
+			.orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않거나 접근 권한이 없습니다."));
+
+		return SearchReviewResult.from(review);
+	}
 }

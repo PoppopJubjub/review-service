@@ -10,6 +10,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -60,5 +61,17 @@ public class ReviewController {
 		PageResponse<SearchReviewResponse> pageResponse = PageResponse.from(response);
 
 		return ApiResponse.of(SuccessCode.OK, pageResponse);
+	}
+
+	@GetMapping("/{reviewId}")
+	public ApiResponse<SearchReviewResponse> getReviewById(
+		@RequestHeader("X-User-Id") Long userId,
+		@PathVariable UUID reviewId
+	) {
+		SearchReviewResult result = reviewService.getReviewById(userId, reviewId);
+
+		SearchReviewResponse response = SearchReviewResponse.from(result);
+
+		return ApiResponse.of(SuccessCode.OK, response);
 	}
 }

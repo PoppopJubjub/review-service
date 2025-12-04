@@ -12,7 +12,10 @@ import com.popjub.reviewservice.domain.entity.Review;
 
 public interface ReviewRepository {
 	Review save(Review review);
+
 	Optional<Review> findById(UUID id);
+
+	Optional<Review> findByReviewIdAndUserId(UUID reviewId, Long userId);
 
 	Page<Review> findAllByUserId(Long userId, Pageable pageable);
 
