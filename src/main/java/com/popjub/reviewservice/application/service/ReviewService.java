@@ -1,6 +1,5 @@
 package com.popjub.reviewservice.application.service;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -14,15 +13,18 @@ import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
 import com.popjub.reviewservice.domain.entity.Review;
 import com.popjub.reviewservice.domain.repository.ReviewRepository;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReviewService {
 
 	private final ReviewRepository reviewRepository;
 	// 검증처리 구현해야함
 	// status : checkIn, storeId 매칭, 중복 작성 불가
+	@Transactional
 	public CreateReviewResult createReview(CreateReviewCommand command) {
 
 		Review review = command.toEntity();
@@ -55,6 +57,7 @@ public class ReviewService {
 		return reviews.map(SearchReviewResult::from);
 	}
 
+	@Transactional
 	public DeleteReviewResult deleteReview(Long userId, UUID reviewId) {
 
 		Review review = reviewRepository
