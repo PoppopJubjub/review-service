@@ -2,6 +2,9 @@ package com.popjub.reviewservice.domain.entity;
 
 import java.util.UUID;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import jakarta.persistence.Id;
 
 import com.popjub.common.entity.BaseEntity;
@@ -19,6 +22,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @Table(name = "p_review")
+@SQLDelete(sql = "UPDATE p_review SET deleted_at = NOW() WHERE review_id = ?")
+@Where(clause = "deleted_at IS NULL")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Review extends BaseEntity {
 
@@ -93,5 +98,9 @@ public class Review extends BaseEntity {
 
 	public void blind() {
 		this.isBlind = true;
+	}
+
+	public void delete(Long userId) {
+		super.softDelete(String.valueOf(userId));
 	}
 }

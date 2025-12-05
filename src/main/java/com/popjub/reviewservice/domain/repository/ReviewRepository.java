@@ -21,4 +21,5 @@ public interface ReviewRepository {
 
 	Page<Review> findAllByStoreId(UUID storeId, Pageable pageable);
 
+	void delete(Review review);
 }

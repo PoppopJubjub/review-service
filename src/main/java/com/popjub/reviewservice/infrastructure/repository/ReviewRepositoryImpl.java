@@ -42,4 +42,9 @@ public class ReviewRepositoryImpl implements ReviewRepository {
 	public Page<Review> findAllByStoreId(UUID storeId, Pageable pageable) {
 		return reviewJpaRepository.findAllByStoreId(storeId, pageable);
 	}
+
+	@Override
+	public void delete(Review review) {
+		reviewJpaRepository.delete(review);
+	}
 }
