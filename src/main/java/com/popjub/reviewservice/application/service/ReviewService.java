@@ -1,9 +1,15 @@
 package com.popjub.reviewservice.application.service;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.popjub.reviewservice.application.dto.command.CreateReviewCommand;
 import com.popjub.reviewservice.application.dto.result.CreateReviewResult;
+import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
 import com.popjub.reviewservice.domain.entity.Review;
 import com.popjub.reviewservice.domain.repository.ReviewRepository;
 
@@ -26,5 +32,25 @@ public class ReviewService {
 			.reviewId(saved.getReviewId())
 			.isBlind(saved.getIsBlind())
 			.build();
+	}
+
+	public Page<SearchReviewResult> getReviewsByUser(Long userId, Pageable pageable) {
+
+		Page<Review> reviews = reviewRepository.findAllByUserId(userId, pageable);
+
+		return reviews.map(SearchReviewResult::from);
+	}
+
+	public SearchReviewResult getReviewById(Long userId, UUID reviewId) {
+		Review review = reviewRepository
+			.findByReviewIdAndUserId(reviewId, userId)
+			.orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않거나 접근 권한이 없습니다."));
+
+		return SearchReviewResult.from(review);
+	}
+
+	public Page<SearchReviewResult> getReviewsByStoreId(UUID storeId, Pageable pageable) {
+		Page<Review> reviews = reviewRepository.findAllByStoreId(storeId, pageable);
+		return reviews.map(SearchReviewResult::from);
 	}
 }
