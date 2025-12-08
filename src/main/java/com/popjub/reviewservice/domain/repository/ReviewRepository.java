@@ -19,7 +19,7 @@ public interface ReviewRepository {
 
 	Page<Review> findAllByUserId(Long userId, Pageable pageable);
 
-	Page<Review> findAllByStoreId(UUID storeId, Pageable pageable);
+	Page<Review> findAllByStoreIdAndIsBlindFalse(UUID storeId, Pageable pageable);
 
 	void delete(Review review);
 }

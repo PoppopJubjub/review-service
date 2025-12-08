@@ -70,7 +70,7 @@ public class ReviewService {
 	}
 
 	public Page<SearchReviewResult> getReviewsByStoreId(UUID storeId, Pageable pageable) {
-		Page<Review> reviews = reviewRepository.findAllByStoreId(storeId, pageable);
+		Page<Review> reviews = reviewRepository.findAllByStoreIdAndIsBlindFalse(storeId, pageable);
 		return reviews.map(SearchReviewResult::from);
 	}
 
