@@ -15,6 +15,8 @@ import com.popjub.reviewservice.application.dto.result.CreateReviewResult;
 import com.popjub.reviewservice.application.dto.result.DeleteReviewResult;
 import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
 import com.popjub.reviewservice.application.event.ReviewCreateEvent;
+import com.popjub.reviewservice.application.event.ReviewEventPublisher;
+import com.popjub.reviewservice.application.event.ReviewRatingUpdateEvent;
 import com.popjub.reviewservice.domain.entity.Review;
 import com.popjub.reviewservice.domain.repository.ReviewRepository;
 
@@ -27,8 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class ReviewService {
 
 	private final ReviewRepository reviewRepository;
-	private final KafkaTemplate<String, String> kafkaTemplate;
-	private final ObjectMapper objectMapper;
+	private final ReviewEventPublisher eventPublisher;
 	// 검증처리 구현해야함
 	// status : checkIn, storeId 매칭, 중복 작성 불가
 	@Transactional
@@ -37,16 +38,13 @@ public class ReviewService {
 		Review review = command.toEntity();
 		Review saved = reviewRepository.save(review);
 
-		ReviewCreateEvent event = new ReviewCreateEvent(
-			saved.getReviewId(),
-			saved.getContent()
+		eventPublisher.publishReviewCreated(
+			new ReviewCreateEvent(saved.getReviewId(), saved.getContent())
 		);
-		try {
-			String message = objectMapper.writeValueAsString(event);
-			kafkaTemplate.send("review.created", message);
-		} catch (Exception e) {
-			throw new RuntimeException("Kafka 이벤트 직렬화 실패", e);
-		}
+
+		eventPublisher.publishReviewRatingUpdated(
+			new ReviewRatingUpdateEvent(saved.getStoreId(), saved.getRating())
+		);
 
 		return CreateReviewResult.from(saved);
 	}
