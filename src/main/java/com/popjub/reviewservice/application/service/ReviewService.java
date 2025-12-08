@@ -8,7 +8,9 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.popjub.reviewservice.application.dto.command.AdminBlindCommand;
 import com.popjub.reviewservice.application.dto.command.CreateReviewCommand;
+import com.popjub.reviewservice.application.dto.result.AdminBlindResult;
 import com.popjub.reviewservice.application.dto.result.CreateReviewResult;
 import com.popjub.reviewservice.application.dto.result.DeleteReviewResult;
 import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
@@ -48,7 +50,7 @@ public class ReviewService {
 
 		return CreateReviewResult.builder()
 			.reviewId(saved.getReviewId())
-			.isBlind(saved.getIsBlind())
+			.isBlind(saved.isBlind())
 			.build();
 	}
 
@@ -90,5 +92,30 @@ public class ReviewService {
 			.orElseThrow(() -> new RuntimeException("Review not Found"));
 
 		review.setBlind(blind);
+	}
+
+	@Transactional
+	public AdminBlindResult updateAdminBlind(AdminBlindCommand command) {
+
+		Review review = reviewRepository.findById(command.reviewId())
+			.orElseThrow(() -> new RuntimeException("Review Not Found"));
+
+		review.setBlind(command.blind());
+		boolean current = review.isBlind();
+
+		return AdminBlindResult.builder()
+			.reviewId(review.getReviewId())
+			.reservationId(review.getReservationId())
+			.userId(review.getUserId())
+			.storeId(review.getStoreId())
+			.rating(review.getRating())
+			.content(review.getContent())
+			.reportCount(review.getReportCount())
+			.currentStatus(current)
+			.createdAt(review.getCreatedAt())
+			.createdBy(review.getCreatedBy())
+			.updatedAt(review.getUpdatedAt())
+			.updatedBy(review.getUpdatedBy())
+			.build();
 	}
 }

@@ -53,7 +53,7 @@ public class Review extends BaseEntity {
 	private Integer reportCount = 0;
 
 	@Column(nullable = false)
-	private Boolean isBlind = false;
+	private boolean isBlind = false;
 
 	@Builder(access = AccessLevel.PRIVATE)
 	private Review(
@@ -94,10 +94,6 @@ public class Review extends BaseEntity {
 
 	public void report() {
 		this.reportCount += 1;
-	}
-
-	public void blind() {
-		this.isBlind = true;
 	}
 
 	public void delete(Long userId) {

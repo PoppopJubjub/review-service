@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,12 +23,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.popjub.common.response.ApiResponse;
 import com.popjub.common.enums.SuccessCode;
 import com.popjub.common.response.PageResponse;
+import com.popjub.reviewservice.application.dto.command.AdminBlindCommand;
 import com.popjub.reviewservice.application.dto.command.CreateReviewCommand;
+import com.popjub.reviewservice.application.dto.result.AdminBlindResult;
 import com.popjub.reviewservice.application.dto.result.CreateReviewResult;
 import com.popjub.reviewservice.application.dto.result.DeleteReviewResult;
 import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
 import com.popjub.reviewservice.application.service.ReviewService;
+import com.popjub.reviewservice.presentation.dto.request.AdminBlindRequest;
 import com.popjub.reviewservice.presentation.dto.request.CreateReviewRequest;
+import com.popjub.reviewservice.presentation.dto.response.AdminBlindResponse;
 import com.popjub.reviewservice.presentation.dto.response.CreateReviewResponse;
 import com.popjub.reviewservice.presentation.dto.response.DeleteReviewResponse;
 import com.popjub.reviewservice.presentation.dto.response.SearchReviewResponse;
@@ -101,5 +106,18 @@ public class ReviewController {
 	) {
 		DeleteReviewResult result = reviewService.deleteReview(userId, reviewId);
 		return ApiResponse.of(SuccessCode.OK, DeleteReviewResponse.from(result));
+	}
+
+	@PatchMapping("/{reviewId}/blind")
+	public ApiResponse<AdminBlindResponse> updateBlind(
+		@RequestHeader("X-User-Id") Long userId,
+		@PathVariable UUID reviewId,
+		@RequestBody AdminBlindRequest request
+	) {
+		AdminBlindCommand command = request.toCommand(reviewId);
+		AdminBlindResult result = reviewService.updateAdminBlind(command);
+		AdminBlindResponse response = AdminBlindResponse.from(result);
+
+		return ApiResponse.of(SuccessCode.OK, response);
 	}
 }
