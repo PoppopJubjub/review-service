@@ -4,9 +4,6 @@ import java.util.UUID;
 
 import com.popjub.reviewservice.domain.entity.Review;
 
-import lombok.Builder;
-
-@Builder
 public record CreateReviewCommand (
 	UUID reservationId,
 	Long userId,

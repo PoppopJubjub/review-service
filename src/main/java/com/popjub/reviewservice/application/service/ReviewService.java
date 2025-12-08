@@ -48,10 +48,7 @@ public class ReviewService {
 			throw new RuntimeException("Kafka 이벤트 직렬화 실패", e);
 		}
 
-		return CreateReviewResult.builder()
-			.reviewId(saved.getReviewId())
-			.isBlind(saved.isBlind())
-			.build();
+		return CreateReviewResult.from(saved);
 	}
 
 	public Page<SearchReviewResult> getReviewsByUser(Long userId, Pageable pageable) {
@@ -101,21 +98,7 @@ public class ReviewService {
 			.orElseThrow(() -> new RuntimeException("Review Not Found"));
 
 		review.setBlind(command.blind());
-		boolean current = review.isBlind();
 
-		return AdminBlindResult.builder()
-			.reviewId(review.getReviewId())
-			.reservationId(review.getReservationId())
-			.userId(review.getUserId())
-			.storeId(review.getStoreId())
-			.rating(review.getRating())
-			.content(review.getContent())
-			.reportCount(review.getReportCount())
-			.currentStatus(current)
-			.createdAt(review.getCreatedAt())
-			.createdBy(review.getCreatedBy())
-			.updatedAt(review.getUpdatedAt())
-			.updatedBy(review.getUpdatedBy())
-			.build();
+		return AdminBlindResult.from(review);
 	}
 }

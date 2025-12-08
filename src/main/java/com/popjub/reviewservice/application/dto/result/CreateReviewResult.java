@@ -2,10 +2,16 @@ package com.popjub.reviewservice.application.dto.result;
 
 import java.util.UUID;
 
-import lombok.Builder;
+import com.popjub.reviewservice.domain.entity.Review;
 
-@Builder
 public record CreateReviewResult (
 	UUID reviewId,
-	Boolean isBlind
-){}
+	boolean isBlind
+){
+	public static CreateReviewResult from(Review review) {
+		return new CreateReviewResult(
+			review.getReviewId(),
+			review.isBlind()
+		);
+	}
+}

@@ -24,19 +24,19 @@ public record AdminBlindResponse(
 ) {
 
 	public static AdminBlindResponse from(AdminBlindResult result) {
-		return AdminBlindResponse.builder()
-			.reviewId(result.reviewId())
-			.reservationId(result.reservationId())
-			.userId(result.userId())
-			.storeId(result.storeId())
-			.rating(result.rating())
-			.content(result.content())
-			.reportCount(result.reportCount())
-			.currentStatus(result.currentStatus())
-			.createdAt(result.createdAt())
-			.createdBy(result.createdBy())
-			.updatedAt(result.updatedAt())
-			.updatedBy(result.updatedBy())
-			.build();
+		return new AdminBlindResponse(
+			result.reviewId(),
+			result.reservationId(),
+			result.userId(),
+			result.storeId(),
+			result.rating(),
+			result.content(),
+			result.reportCount(),
+			result.currentStatus(),
+			result.createdAt(),
+			result.createdBy(),
+			result.updatedAt(),
+			result.updatedBy()
+		);
 	}
 }

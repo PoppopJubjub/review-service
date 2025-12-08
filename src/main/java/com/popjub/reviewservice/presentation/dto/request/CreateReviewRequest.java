@@ -12,13 +12,13 @@ public record CreateReviewRequest (
 	String imageUrl
 ) {
 	public CreateReviewCommand toCommand(Long userId) {
-		return CreateReviewCommand.builder()
-			.reservationId(this.reservationId)
-			.userId(userId)
-			.storeId(this.storeId)
-			.rating(this.rating)
-			.content(this.content)
-			.imageUrl(this.imageUrl)
-			.build();
+		return new CreateReviewCommand(
+			reservationId,
+			userId,
+			storeId,
+			rating,
+			content,
+			imageUrl
+		);
 	}
 }
