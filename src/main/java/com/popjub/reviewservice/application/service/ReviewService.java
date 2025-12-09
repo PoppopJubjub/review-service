@@ -15,10 +15,14 @@ import com.popjub.reviewservice.application.dto.result.CreateReviewResult;
 import com.popjub.reviewservice.application.dto.result.DeleteReviewResult;
 import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
 import com.popjub.reviewservice.application.event.ReviewCreateEvent;
+import com.popjub.reviewservice.application.event.ReviewDeletedEvent;
 import com.popjub.reviewservice.application.event.ReviewEventPublisher;
 import com.popjub.reviewservice.application.event.ReviewRatingUpdateEvent;
 import com.popjub.reviewservice.domain.entity.Review;
 import com.popjub.reviewservice.domain.repository.ReviewRepository;
+import com.popjub.reviewservice.infrastructure.client.StoreClient;
+import com.popjub.reviewservice.presentation.dto.request.StoreRatingDeleteRequest;
+import com.popjub.reviewservice.presentation.dto.request.StoreRatingUpdateRequest;
 
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +34,7 @@ public class ReviewService {
 
 	private final ReviewRepository reviewRepository;
 	private final ReviewEventPublisher eventPublisher;
+	private final StoreClient storeClient;
 	// 검증처리 구현해야함
 	// status : checkIn, storeId 매칭, 중복 작성 불가
 	@Transactional
@@ -40,10 +45,6 @@ public class ReviewService {
 
 		eventPublisher.publishReviewCreated(
 			new ReviewCreateEvent(saved.getReviewId(), saved.getContent())
-		);
-
-		eventPublisher.publishReviewRatingUpdated(
-			new ReviewRatingUpdateEvent(saved.getStoreId(), saved.getRating())
 		);
 
 		return CreateReviewResult.from(saved);
@@ -78,6 +79,16 @@ public class ReviewService {
 		review.delete(userId);
 		//reviewRepository.delete(review);
 
+		storeClient.deleteStoreRating(
+			review.getStoreId(),
+			new StoreRatingDeleteRequest(review.getStoreId(), review.getRating())
+		);
+
+		/* kafka
+		eventPublisher.publishReviewDeleted(
+			new ReviewDeletedEvent(review.getStoreId(), review.getRating())
+		);
+		 */
 		return DeleteReviewResult.from(review.getReviewId());
 	}
 
@@ -87,15 +98,31 @@ public class ReviewService {
 			.orElseThrow(() -> new RuntimeException("Review not Found"));
 
 		review.setBlind(blind);
+		// blind == false 인 경우에만 평점 이벤트 발행
+		if (!blind) {
+			storeClient.updateStoreRating(
+				review.getStoreId(),
+				new StoreRatingUpdateRequest(review.getStoreId(), review.getRating())
+			);
+		}
+		/* kafka
+		if (!blind) {
+			eventPublisher.publishReviewRatingUpdated(
+				new ReviewRatingUpdateEvent(review.getStoreId(), review.getRating())
+			);
+		}
+		 */
 	}
 
 	@Transactional
 	public AdminBlindResult updateAdminBlind(AdminBlindCommand command) {
 
+		updateBlind(command.reviewId(), command.blind());
+
 		Review review = reviewRepository.findById(command.reviewId())
 			.orElseThrow(() -> new RuntimeException("Review Not Found"));
 
-		review.setBlind(command.blind());
+		//review.setBlind(command.blind());
 
 		return AdminBlindResult.from(review);
 	}
