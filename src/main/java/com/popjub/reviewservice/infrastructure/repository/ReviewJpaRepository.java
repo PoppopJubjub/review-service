@@ -9,12 +9,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.popjub.reviewservice.domain.entity.Review;
 
+import jakarta.annotation.PostConstruct;
+
 public interface ReviewJpaRepository extends JpaRepository<Review, UUID> {
 
 	Page<Review> findAllByUserId(Long userId, Pageable pageable);
 
 	Optional<Review> findByReviewIdAndUserId(UUID reviewId, Long userId);
 
-	Page<Review> findAllByStoreId(UUID storeId, Pageable pageable);
-
+	Page<Review> findAllByStoreIdAndIsBlindFalse(UUID storeId, Pageable pageable);
 }

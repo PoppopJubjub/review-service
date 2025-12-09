@@ -8,7 +8,9 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.popjub.reviewservice.application.dto.command.AdminBlindCommand;
 import com.popjub.reviewservice.application.dto.command.CreateReviewCommand;
+import com.popjub.reviewservice.application.dto.result.AdminBlindResult;
 import com.popjub.reviewservice.application.dto.result.CreateReviewResult;
 import com.popjub.reviewservice.application.dto.result.DeleteReviewResult;
 import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
@@ -46,10 +48,7 @@ public class ReviewService {
 			throw new RuntimeException("Kafka 이벤트 직렬화 실패", e);
 		}
 
-		return CreateReviewResult.builder()
-			.reviewId(saved.getReviewId())
-			.isBlind(saved.getIsBlind())
-			.build();
+		return CreateReviewResult.from(saved);
 	}
 
 	public Page<SearchReviewResult> getReviewsByUser(Long userId, Pageable pageable) {
@@ -68,7 +67,7 @@ public class ReviewService {
 	}
 
 	public Page<SearchReviewResult> getReviewsByStoreId(UUID storeId, Pageable pageable) {
-		Page<Review> reviews = reviewRepository.findAllByStoreId(storeId, pageable);
+		Page<Review> reviews = reviewRepository.findAllByStoreIdAndIsBlindFalse(storeId, pageable);
 		return reviews.map(SearchReviewResult::from);
 	}
 
@@ -90,5 +89,16 @@ public class ReviewService {
 			.orElseThrow(() -> new RuntimeException("Review not Found"));
 
 		review.setBlind(blind);
+	}
+
+	@Transactional
+	public AdminBlindResult updateAdminBlind(AdminBlindCommand command) {
+
+		Review review = reviewRepository.findById(command.reviewId())
+			.orElseThrow(() -> new RuntimeException("Review Not Found"));
+
+		review.setBlind(command.blind());
+
+		return AdminBlindResult.from(review);
 	}
 }

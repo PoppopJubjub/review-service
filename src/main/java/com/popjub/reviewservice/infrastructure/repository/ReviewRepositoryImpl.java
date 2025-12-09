@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.popjub.reviewservice.domain.entity.Review;
 import com.popjub.reviewservice.domain.repository.ReviewRepository;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
 @Repository
@@ -39,8 +40,8 @@ public class ReviewRepositoryImpl implements ReviewRepository {
 	}
 
 	@Override
-	public Page<Review> findAllByStoreId(UUID storeId, Pageable pageable) {
-		return reviewJpaRepository.findAllByStoreId(storeId, pageable);
+	public Page<Review> findAllByStoreIdAndIsBlindFalse(UUID storeId, Pageable pageable) {
+		return reviewJpaRepository.findAllByStoreIdAndIsBlindFalse(storeId, pageable);
 	}
 
 	@Override
