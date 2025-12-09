@@ -28,6 +28,7 @@ import com.popjub.reviewservice.application.dto.command.CreateReviewCommand;
 import com.popjub.reviewservice.application.dto.result.AdminBlindResult;
 import com.popjub.reviewservice.application.dto.result.CreateReviewResult;
 import com.popjub.reviewservice.application.dto.result.DeleteReviewResult;
+import com.popjub.reviewservice.application.dto.result.ReviewReportResult;
 import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
 import com.popjub.reviewservice.application.service.ReviewService;
 import com.popjub.reviewservice.presentation.dto.request.AdminBlindRequest;
@@ -35,6 +36,7 @@ import com.popjub.reviewservice.presentation.dto.request.CreateReviewRequest;
 import com.popjub.reviewservice.presentation.dto.response.AdminBlindResponse;
 import com.popjub.reviewservice.presentation.dto.response.CreateReviewResponse;
 import com.popjub.reviewservice.presentation.dto.response.DeleteReviewResponse;
+import com.popjub.reviewservice.presentation.dto.response.ReviewReportResponse;
 import com.popjub.reviewservice.presentation.dto.response.SearchReviewResponse;
 
 import jakarta.validation.Valid;
@@ -117,6 +119,17 @@ public class ReviewController {
 		AdminBlindCommand command = request.toCommand(reviewId);
 		AdminBlindResult result = reviewService.updateAdminBlind(command);
 		AdminBlindResponse response = AdminBlindResponse.from(result);
+
+		return ApiResponse.of(SuccessCode.OK, response);
+	}
+
+	@PostMapping("/{reviewId}/report")
+	public ApiResponse<ReviewReportResponse> reportReview(
+		@RequestHeader("X-User-Id") Long userId,
+		@PathVariable UUID reviewId
+	) {
+		ReviewReportResult result = reviewService.reportReview(userId, reviewId);
+		ReviewReportResponse response = ReviewReportResponse.from(result);
 
 		return ApiResponse.of(SuccessCode.OK, response);
 	}

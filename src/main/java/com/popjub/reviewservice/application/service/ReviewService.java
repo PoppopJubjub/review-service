@@ -13,12 +13,15 @@ import com.popjub.reviewservice.application.dto.command.CreateReviewCommand;
 import com.popjub.reviewservice.application.dto.result.AdminBlindResult;
 import com.popjub.reviewservice.application.dto.result.CreateReviewResult;
 import com.popjub.reviewservice.application.dto.result.DeleteReviewResult;
+import com.popjub.reviewservice.application.dto.result.ReviewReportResult;
 import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
 import com.popjub.reviewservice.application.event.ReviewCreateEvent;
 import com.popjub.reviewservice.application.event.ReviewDeletedEvent;
 import com.popjub.reviewservice.application.event.ReviewEventPublisher;
 import com.popjub.reviewservice.application.event.ReviewRatingUpdateEvent;
 import com.popjub.reviewservice.domain.entity.Review;
+import com.popjub.reviewservice.domain.entity.ReviewReport;
+import com.popjub.reviewservice.domain.repository.ReviewReportRepository;
 import com.popjub.reviewservice.domain.repository.ReviewRepository;
 import com.popjub.reviewservice.infrastructure.client.StoreClient;
 import com.popjub.reviewservice.presentation.dto.request.StoreRatingDeleteRequest;
@@ -35,6 +38,7 @@ public class ReviewService {
 	private final ReviewRepository reviewRepository;
 	private final ReviewEventPublisher eventPublisher;
 	private final StoreClient storeClient;
+	private final ReviewReportRepository reviewReportRepository;
 	// 검증처리 구현해야함
 	// status : checkIn, storeId 매칭, 중복 작성 불가
 	@Transactional
@@ -125,5 +129,27 @@ public class ReviewService {
 		//review.setBlind(command.blind());
 
 		return AdminBlindResult.from(review);
+	}
+
+	@Transactional
+	public ReviewReportResult reportReview(Long userId, UUID reviewId) {
+
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않습니다."));
+
+		// 이미 신고한 적 있는 유저인지 확인
+		boolean alreadyReported = reviewReportRepository.existsByReviewIdAndUserId(reviewId, userId);
+		if (alreadyReported) {
+			throw new RuntimeException("이미 신고한 리뷰입니다.");
+		}
+
+		// ReviewReport 테이블에 기록 남기기
+		ReviewReport report = ReviewReport.of(reviewId, userId);
+		reviewReportRepository.save(report);
+
+		// review 엔티티 신고 횟수 증가
+		review.report();
+
+		return new ReviewReportResult(review.getReviewId(), review.getReportCount());
 	}
 }
