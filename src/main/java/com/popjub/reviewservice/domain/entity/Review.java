@@ -8,6 +8,8 @@ import org.hibernate.annotations.Where;
 import jakarta.persistence.Id;
 
 import com.popjub.common.entity.BaseEntity;
+import com.popjub.reviewservice.exception.ReviewCustomException;
+import com.popjub.reviewservice.exception.ReviewErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -55,6 +57,12 @@ public class Review extends BaseEntity {
 	@Column(nullable = false)
 	private boolean isBlind = false;
 
+	private static void validateRating(int rating) {
+		if (rating < 1 || rating > 5) {
+			throw new ReviewCustomException(ReviewErrorCode.INVALID_RATING_VALUE);
+		}
+	}
+
 	@Builder(access = AccessLevel.PRIVATE)
 	private Review(
 		UUID reservationId,
@@ -64,6 +72,7 @@ public class Review extends BaseEntity {
 		String content,
 		String imageUrl
 	) {
+		validateRating(rating); //생성시점 검증
 		this.reservationId = reservationId;
 		this.userId = userId;
 		this.storeId = storeId;
@@ -92,6 +101,12 @@ public class Review extends BaseEntity {
 			.build();
 	}
 
+	public void validateReportable() {
+		if (this.isBlind) {
+			throw new ReviewCustomException(ReviewErrorCode.CANNOT_REPORT_BLINDED_REVIEW);
+		}
+	}
+
 	public void report() {
 		this.reportCount += 1;
 	}
@@ -100,7 +115,10 @@ public class Review extends BaseEntity {
 		super.softDelete(String.valueOf(userId));
 	}
 
-	public void setBlind(boolean blind) {
-		this.isBlind = blind;
+	public void changeBlind(boolean newBlind) {
+		if (this.isBlind == newBlind) {
+			throw new ReviewCustomException(ReviewErrorCode.INVALID_BLIND_STATE);
+		}
+		this.isBlind = newBlind;
 	}
 }

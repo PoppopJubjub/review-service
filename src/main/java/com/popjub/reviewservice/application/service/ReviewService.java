@@ -4,10 +4,8 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.popjub.reviewservice.application.dto.command.AdminBlindCommand;
 import com.popjub.reviewservice.application.dto.command.CreateReviewCommand;
 import com.popjub.reviewservice.application.dto.result.AdminBlindResult;
@@ -23,6 +21,8 @@ import com.popjub.reviewservice.domain.entity.Review;
 import com.popjub.reviewservice.domain.entity.ReviewReport;
 import com.popjub.reviewservice.domain.repository.ReviewReportRepository;
 import com.popjub.reviewservice.domain.repository.ReviewRepository;
+import com.popjub.reviewservice.exception.ReviewCustomException;
+import com.popjub.reviewservice.exception.ReviewErrorCode;
 import com.popjub.reviewservice.infrastructure.client.StoreClient;
 import com.popjub.reviewservice.presentation.dto.request.StoreRatingDeleteRequest;
 import com.popjub.reviewservice.presentation.dto.request.StoreRatingUpdateRequest;
@@ -46,10 +46,6 @@ public class ReviewService {
 	@Transactional
 	public CreateReviewResult createReview(CreateReviewCommand command) {
 
-		if (command.rating() < 1 || command.rating() > 5) {
-			throw new IllegalArgumentException("평점은 1~5 사이여야 합니다.");
-		}
-
 		Review review = command.toEntity();
 		Review saved = reviewRepository.save(review);
 
@@ -61,16 +57,14 @@ public class ReviewService {
 	}
 
 	public Page<SearchReviewResult> getReviewsByUser(Long userId, Pageable pageable) {
-
-		Page<Review> reviews = reviewRepository.findAllByUserId(userId, pageable);
-
-		return reviews.map(SearchReviewResult::from);
+		return reviewRepository.findAllByUserId(userId, pageable)
+			.map(SearchReviewResult::from);
 	}
 
 	public SearchReviewResult getReviewById(Long userId, UUID reviewId) {
 		Review review = reviewRepository
 			.findByReviewIdAndUserId(reviewId, userId)
-			.orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않거나 접근 권한이 없습니다."));
+			.orElseThrow(() -> new ReviewCustomException(ReviewErrorCode.REVIEW_ACCESS_DENIED));
 
 		return SearchReviewResult.from(review);
 	}
@@ -85,11 +79,7 @@ public class ReviewService {
 
 		Review review = reviewRepository
 			.findByReviewIdAndUserId(reviewId, userId)
-			.orElseThrow(() -> new RuntimeException("리뷰가 없거나 삭제 권한이 없습니다."));
-
-		if (review.getDeletedAt() != null) {
-			throw new IllegalStateException("이미 삭제된 리뷰입니다.");
-		}
+			.orElseThrow(() -> new ReviewCustomException(ReviewErrorCode.REVIEW_ACCESS_DENIED));
 
 		review.delete(userId);
 		//reviewRepository.delete(review);
@@ -110,9 +100,9 @@ public class ReviewService {
 	@Transactional
 	public void updateBlind(UUID reviewId, boolean blind) {
 		Review review = reviewRepository.findById(reviewId)
-			.orElseThrow(() -> new RuntimeException("Review not Found"));
+			.orElseThrow(() -> new ReviewCustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
 
-		review.setBlind(blind);
+		review.changeBlind(blind);
 		// blind == false 인 경우에만 평점 이벤트 발행
 		if (!blind) {
 			storeClient.updateStoreRating(
@@ -135,10 +125,8 @@ public class ReviewService {
 		updateBlind(command.reviewId(), command.blind());
 
 		Review review = reviewRepository.findById(command.reviewId())
-			.orElseThrow(() -> new RuntimeException("Review Not Found"));
-
+			.orElseThrow(() -> new ReviewCustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
 		//review.setBlind(command.blind());
-
 		return AdminBlindResult.from(review);
 	}
 
@@ -146,16 +134,14 @@ public class ReviewService {
 	public ReviewReportResult reportReview(Long userId, UUID reviewId) {
 
 		Review review = reviewRepository.findById(reviewId)
-			.orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않습니다."));
+			.orElseThrow(() -> new ReviewCustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
 
-		if (review.isBlind()) {
-			throw new IllegalStateException("블라인드 처리된 리뷰는 신고할 수 없습니다.");
-		}
-
+		review.validateReportable();
 		// 이미 신고한 적 있는 유저인지 확인
-		boolean alreadyReported = reviewReportRepository.existsByReviewIdAndUserId(reviewId, userId);
+		boolean alreadyReported =
+			reviewReportRepository.existsByReviewIdAndUserId(reviewId, userId);
 		if (alreadyReported) {
-			throw new RuntimeException("이미 신고한 리뷰입니다.");
+			throw new ReviewCustomException(ReviewErrorCode.ALREADY_REPORTED_REVIEW);
 		}
 
 		// ReviewReport 테이블에 기록 남기기

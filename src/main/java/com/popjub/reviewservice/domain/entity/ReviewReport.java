@@ -3,6 +3,9 @@ package com.popjub.reviewservice.domain.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.popjub.reviewservice.exception.ReviewCustomException;
+import com.popjub.reviewservice.exception.ReviewErrorCode;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
