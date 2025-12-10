@@ -18,9 +18,9 @@ public record AdminBlindResult(
 	Integer reportCount,
 	boolean currentStatus,
 	LocalDateTime createdAt,
-	String createdBy,
+	Long createdBy,
 	LocalDateTime updatedAt,
-	String updatedBy
+	Long updatedBy
 ) {
 	//필드 많아서 Builder
 	public static AdminBlindResult from(Review review) {
