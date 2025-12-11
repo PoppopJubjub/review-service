@@ -18,9 +18,9 @@ public record AdminBlindResponse(
 	Integer reportCount,
 	boolean currentStatus,
 	LocalDateTime createdAt,
-	String createdBy,
+	Long createdBy,
 	LocalDateTime updatedAt,
-	String updatedBy
+	Long updatedBy
 ) {
 
 	public static AdminBlindResponse from(AdminBlindResult result) {

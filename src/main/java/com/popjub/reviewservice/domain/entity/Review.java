@@ -112,7 +112,7 @@ public class Review extends BaseEntity {
 	}
 
 	public void delete(Long userId) {
-		super.softDelete(String.valueOf(userId));
+		super.softDelete(userId);
 	}
 
 	public void changeBlind(boolean newBlind) {
