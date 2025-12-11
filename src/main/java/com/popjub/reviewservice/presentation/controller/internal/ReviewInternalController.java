@@ -27,7 +27,7 @@ public class ReviewInternalController {
 		@PathVariable UUID id,
 		@RequestBody BlindUpdateRequest request
 	) {
-		log.info("AI 블라인드 true: id={}, blind={}", id, request.blind());
+		log.info("[AI 결과] 리뷰 {} blind 상태 변경 요청: {}", id, request.blind());
 		reviewService.updateBlind(id, request.blind());
 	}
 }
