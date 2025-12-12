@@ -116,9 +116,9 @@ public class Review extends BaseEntity {
 	}
 
 	public void changeBlind(boolean newBlind) {
-		if (this.isBlind == newBlind) {
-			throw new ReviewCustomException(ReviewErrorCode.INVALID_BLIND_STATE);
-		}
+		//if (this.isBlind == newBlind) {
+		//	throw new ReviewCustomException(ReviewErrorCode.INVALID_BLIND_STATE);
+		//}
 		this.isBlind = newBlind;
 	}
 }

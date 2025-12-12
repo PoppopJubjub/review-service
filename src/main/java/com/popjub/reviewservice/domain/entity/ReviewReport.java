@@ -3,6 +3,7 @@ package com.popjub.reviewservice.domain.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.popjub.common.entity.BaseEntity;
 import com.popjub.reviewservice.exception.ReviewCustomException;
 import com.popjub.reviewservice.exception.ReviewErrorCode;
 
@@ -21,7 +22,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "p_review_report")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ReviewReport {
+public class ReviewReport extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -33,14 +34,10 @@ public class ReviewReport {
 	@Column(nullable = false)
 	private Long userId;
 
-	@Column(nullable = false)
-	private LocalDateTime reportedAt;
-
 	@Builder
 	private ReviewReport(UUID reviewId, Long userId) {
 		this.reviewId = reviewId;
 		this.userId = userId;
-		this.reportedAt = LocalDateTime.now();
 	}
 
 	public static ReviewReport of(UUID reviewId, Long userId) {
