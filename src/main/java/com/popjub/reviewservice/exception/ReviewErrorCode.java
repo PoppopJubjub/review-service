@@ -23,7 +23,9 @@ public enum ReviewErrorCode implements BaseErrorCode {
 	// 403
 	REVIEW_ACCESS_DENIED("403:리뷰에 접근할 권한이 없습니다.", HttpStatus.FORBIDDEN),
 	ADMIN_ONLY_ACTION("403:관리자만 수행할 수 있는 작업입니다.", HttpStatus.FORBIDDEN),
-	RESERVATION_NOT_MATCHED("403:예약 정보가 일치하지 않습니다.", HttpStatus.FORBIDDEN);
+	RESERVATION_NOT_MATCHED("403:예약 정보가 일치하지 않습니다.", HttpStatus.FORBIDDEN),
+
+	KAFKA_EVENT_PARSE_FAIL("400:Kafka 메시지 파싱 실패", HttpStatus.BAD_REQUEST);
 
 	private final String message;
 	private final HttpStatus status;
