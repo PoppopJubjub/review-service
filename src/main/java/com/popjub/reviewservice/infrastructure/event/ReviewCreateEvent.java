@@ -1,4 +1,4 @@
-package com.popjub.reviewservice.application.event;
+package com.popjub.reviewservice.infrastructure.event;
 
 import java.util.UUID;
 

@@ -13,10 +13,7 @@ import com.popjub.reviewservice.application.dto.result.CreateReviewResult;
 import com.popjub.reviewservice.application.dto.result.DeleteReviewResult;
 import com.popjub.reviewservice.application.dto.result.ReviewReportResult;
 import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
-import com.popjub.reviewservice.application.event.ReviewCreateEvent;
-import com.popjub.reviewservice.application.event.ReviewDeletedEvent;
-import com.popjub.reviewservice.application.event.ReviewEventPublisher;
-import com.popjub.reviewservice.application.event.ReviewRatingUpdateEvent;
+import com.popjub.reviewservice.application.port.ReviewEventPort;
 import com.popjub.reviewservice.domain.entity.Review;
 import com.popjub.reviewservice.domain.entity.ReviewReport;
 import com.popjub.reviewservice.domain.repository.ReviewReportRepository;
@@ -36,7 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class ReviewService {
 
 	private final ReviewRepository reviewRepository;
-	private final ReviewEventPublisher eventPublisher;
+	private final ReviewEventPort reviewEventPort;
 	private final StoreClient storeClient;
 	private final ReviewReportRepository reviewReportRepository;
 	// 검증처리 구현해야함
@@ -49,9 +46,7 @@ public class ReviewService {
 		Review review = command.toEntity();
 		Review saved = reviewRepository.save(review);
 
-		eventPublisher.publishReviewCreated(
-			new ReviewCreateEvent(saved.getReviewId(), saved.getContent())
-		);
+		reviewEventPort.reviewCreated(review);
 
 		return CreateReviewResult.from(saved);
 	}

@@ -1,13 +1,12 @@
-package com.popjub.reviewservice.infrastructure.event;
+package com.popjub.reviewservice.infrastructure.event.publisher;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.popjub.reviewservice.application.event.ReviewCreateEvent;
-import com.popjub.reviewservice.application.event.ReviewDeletedEvent;
-import com.popjub.reviewservice.application.event.ReviewEventPublisher;
-import com.popjub.reviewservice.application.event.ReviewRatingUpdateEvent;
+import com.popjub.reviewservice.infrastructure.event.ReviewCreateEvent;
+import com.popjub.reviewservice.infrastructure.event.ReviewDeletedEvent;
+import com.popjub.reviewservice.infrastructure.event.ReviewRatingUpdateEvent;
 
 import lombok.RequiredArgsConstructor;
 
