@@ -111,7 +111,14 @@ public class Review extends BaseEntity {
 		this.reportCount += 1;
 	}
 
+	public void validateDeletableBy(Long requesterId) {
+		if (!this.userId.equals(requesterId)) {
+			throw new ReviewCustomException(ReviewErrorCode.REVIEW_ACCESS_DENIED);
+		}
+	}
+
 	public void delete(Long userId) {
+		validateDeletableBy(userId);
 		super.softDelete(userId);
 	}
 
@@ -120,5 +127,11 @@ public class Review extends BaseEntity {
 		//	throw new ReviewCustomException(ReviewErrorCode.INVALID_BLIND_STATE);
 		//}
 		this.isBlind = newBlind;
+	}
+
+	public void adminChangeBlind(boolean newBlind, Long adminUserId) {
+		this.isBlind = newBlind;
+		// this.blindedBy = adminUserId;
+		// this.blindedAt = LocalDateTime.now();
 	}
 }
