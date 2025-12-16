@@ -1,5 +1,6 @@
 package com.popjub.reviewservice.application.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import com.popjub.reviewservice.application.dto.result.DeleteReviewResult;
 import com.popjub.reviewservice.application.dto.result.ReviewReportResult;
 import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
 import com.popjub.reviewservice.application.port.ReviewEventPort;
+import com.popjub.reviewservice.application.validation.ReviewValidator;
 import com.popjub.reviewservice.domain.entity.Review;
 import com.popjub.reviewservice.domain.entity.ReviewReport;
 import com.popjub.reviewservice.domain.repository.ReviewReportRepository;
@@ -36,12 +38,12 @@ public class ReviewService {
 	private final ReviewEventPort reviewEventPort;
 	private final StoreClient storeClient;
 	private final ReviewReportRepository reviewReportRepository;
-	// 검증처리 구현해야함
-	// status : checkIn, storeId 매칭, 중복 작성 불가
-	//	TODO 예약자 본인이 맞는지 검증(Feign Reservation)
-	// 	TODO 리뷰 중복 작성 방지
+	private final ReviewValidator reviewValidator;
+
 	@Transactional
 	public CreateReviewResult createReview(CreateReviewCommand command) {
+
+		reviewValidator.validateCreate(command);
 
 		Review review = command.toEntity();
 		Review saved = reviewRepository.save(review);
@@ -68,7 +70,7 @@ public class ReviewService {
 		Page<Review> reviews = reviewRepository.findAllByStoreIdAndIsBlindFalse(storeId, pageable);
 		return reviews.map(SearchReviewResult::from);
 	}
-	// TODO 관리자 및 본인만 삭제 가능
+
 	@Transactional
 	public DeleteReviewResult deleteReview(Long userId, UUID reviewId) {
 
@@ -77,7 +79,6 @@ public class ReviewService {
 			.orElseThrow(() -> new ReviewCustomException(ReviewErrorCode.REVIEW_ACCESS_DENIED));
 
 		review.delete(userId);
-		//reviewRepository.delete(review);
 
 		storeClient.deleteStoreRating(
 			review.getStoreId(),
@@ -113,15 +114,20 @@ public class ReviewService {
 		}
 		 */
 	}
-	// TODO admin 권한 검증
+
 	@Transactional
-	public AdminBlindResult updateAdminBlind(AdminBlindCommand command) {
-
-		updateBlind(command.reviewId(), command.blind());
-
+	public AdminBlindResult updateAdminBlind(
+		AdminBlindCommand command,
+		Long userId,
+		List<String> roles
+	) {
 		Review review = reviewRepository.findById(command.reviewId())
 			.orElseThrow(() -> new ReviewCustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
-		//review.setBlind(command.blind());
+
+		reviewValidator.validateAdminAction(roles);
+
+		review.adminChangeBlind(command.blind(), userId);
+
 		return AdminBlindResult.from(review);
 	}
 
@@ -131,21 +137,16 @@ public class ReviewService {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new ReviewCustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
 
-		review.validateReportable();
-		// 이미 신고한 적 있는 유저인지 확인
-		boolean alreadyReported =
-			reviewReportRepository.existsByReviewIdAndUserId(reviewId, userId);
-		if (alreadyReported) {
-			throw new ReviewCustomException(ReviewErrorCode.ALREADY_REPORTED_REVIEW);
-		}
+		reviewValidator.validateReport(review, userId);
 
-		// ReviewReport 테이블에 기록 남기기
 		ReviewReport report = ReviewReport.of(reviewId, userId);
 		reviewReportRepository.save(report);
 
-		// review 엔티티 신고 횟수 증가
 		review.report();
 
-		return new ReviewReportResult(review.getReviewId(), review.getReportCount());
+		return new ReviewReportResult(
+			review.getReviewId(),
+			review.getReportCount()
+		);
 	}
 }
