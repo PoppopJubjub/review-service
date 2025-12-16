@@ -21,5 +21,7 @@ public interface ReviewRepository {
 
 	Page<Review> findAllByStoreIdAndIsBlindFalse(UUID storeId, Pageable pageable);
 
+	boolean existsByReservationId(UUID reservationId);
+
 	void delete(Review review);
 }

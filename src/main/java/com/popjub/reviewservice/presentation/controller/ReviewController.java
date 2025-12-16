@@ -131,6 +131,7 @@ public class ReviewController {
 		return ApiResponse.of(SuccessCode.OK, AdminBlindResponse.from(result));
 	}
 
+	@RoleCheck(UserRole.USER)
 	@PostMapping("/{reviewId}/report")
 	public ApiResponse<ReviewReportResponse> reportReview(
 		@PathVariable UUID reviewId,
