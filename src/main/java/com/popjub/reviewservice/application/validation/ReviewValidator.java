@@ -31,7 +31,8 @@ public class ReviewValidator {
 
 		String status = reservationPort.validateReviewable(
 			command.reservationId(),
-			command.userId()
+			command.userId(),
+			command.storeId()
 		);
 
 		ReviewableStatus reviewableStatus = ReviewableStatus.from(status);

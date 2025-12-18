@@ -18,9 +18,9 @@ public class ReservationAdapter implements ReservationPort {
 	private final ReservationClient reservationClient;
 
 	@Override
-	public String validateReviewable(UUID reservationId, Long userId) {
+	public String validateReviewable(UUID reservationId, Long userId, UUID storeId) {
 		try {
-			return reservationClient.validateReservation(reservationId, userId);
+			return reservationClient.validateReservation(reservationId, userId, storeId);
 
 		} catch (feign.FeignException.NotFound e) {
 			// 예약 자체가 없음

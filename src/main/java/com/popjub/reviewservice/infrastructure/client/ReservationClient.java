@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "reservation-service")
 public interface ReservationClient {
 
-	@PostMapping("/internal/reservations/{reservationId}/validate")
+	@PostMapping("/internal/reservations/validate")
 	String validateReservation(
-		@PathVariable UUID reservationId,
-		@RequestParam Long userId
+		@RequestParam UUID reservationId,
+		@RequestParam Long userId,
+		@RequestParam UUID storeId
 	);
 }
