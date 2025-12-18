@@ -7,19 +7,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.popjub.common.annotation.CurrentUser;
+import com.popjub.common.annotation.RoleCheck;
+import com.popjub.common.context.UserContext;
+import com.popjub.common.enums.ErrorCode;
+import com.popjub.common.enums.UserRole;
+import com.popjub.common.exception.CommonException;
 import com.popjub.common.response.ApiResponse;
 import com.popjub.common.enums.SuccessCode;
 import com.popjub.common.response.PageResponse;
@@ -52,9 +54,10 @@ public class ReviewController {
 	@PostMapping
 	public ApiResponse<CreateReviewResponse> createReview(
 		@Valid @RequestBody CreateReviewRequest request,
-		@RequestHeader("X-User-Id") Long userId
+		@CurrentUser UserContext user
 	) {
-		CreateReviewCommand command = request.toCommand(userId);
+		CreateReviewCommand command = request.toCommand(user.getUserId());
+
 		CreateReviewResult result = reviewService.createReview(command);
 		CreateReviewResponse response = CreateReviewResponse.from(result);
 
@@ -63,10 +66,10 @@ public class ReviewController {
 
 	@GetMapping
 	public ApiResponse<PageResponse<SearchReviewResponse>> getMyReview(
-		@RequestHeader("X-User-Id") Long userId,
+		@CurrentUser UserContext user,
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		Page<SearchReviewResult> result = reviewService.getReviewsByUser(userId, pageable);
+		Page<SearchReviewResult> result = reviewService.getReviewsByUser(user.getUserId(), pageable);
 		Page<SearchReviewResponse> response = result.map(SearchReviewResponse::from);
 		PageResponse<SearchReviewResponse> pageResponse = PageResponse.from(response);
 
@@ -75,10 +78,10 @@ public class ReviewController {
 
 	@GetMapping("/{reviewId}")
 	public ApiResponse<SearchReviewResponse> getReviewById(
-		@RequestHeader("X-User-Id") Long userId,
-		@PathVariable UUID reviewId
+		@PathVariable UUID reviewId,
+		@CurrentUser UserContext user
 	) {
-		SearchReviewResult result = reviewService.getReviewById(userId, reviewId);
+		SearchReviewResult result = reviewService.getReviewById(user.getUserId(), reviewId);
 
 		SearchReviewResponse response = SearchReviewResponse.from(result);
 
@@ -101,34 +104,40 @@ public class ReviewController {
 		return ApiResponse.of(SuccessCode.OK, pageResponse);
 	}
 
+	@RoleCheck(UserRole.USER)
 	@DeleteMapping("/{reviewId}")
 	public ApiResponse<DeleteReviewResponse> deleteReview(
-		@RequestHeader("X-User-Id") Long userId,
-		@PathVariable UUID reviewId
+		@PathVariable UUID reviewId,
+		@CurrentUser UserContext user
 	) {
-		DeleteReviewResult result = reviewService.deleteReview(userId, reviewId);
+		if (user == null) {
+			throw new CommonException(ErrorCode.USER_CONTEXT_NOT_FOUND);
+		}
+		DeleteReviewResult result = reviewService.deleteReview(user.getUserId(), reviewId);
 		return ApiResponse.of(SuccessCode.OK, DeleteReviewResponse.from(result));
 	}
 
+	@RoleCheck(UserRole.ADMIN)
 	@PatchMapping("/{reviewId}/blind")
 	public ApiResponse<AdminBlindResponse> updateBlind(
-		@RequestHeader("X-User-Id") Long userId,
 		@PathVariable UUID reviewId,
-		@RequestBody AdminBlindRequest request
+		@RequestBody AdminBlindRequest request,
+		@CurrentUser UserContext user
 	) {
 		AdminBlindCommand command = request.toCommand(reviewId);
-		AdminBlindResult result = reviewService.updateAdminBlind(command);
-		AdminBlindResponse response = AdminBlindResponse.from(result);
+		AdminBlindResult result = reviewService.updateAdminBlind(command, user.getUserId(),
+			user.getRoles());
 
-		return ApiResponse.of(SuccessCode.OK, response);
+		return ApiResponse.of(SuccessCode.OK, AdminBlindResponse.from(result));
 	}
 
+	@RoleCheck(UserRole.USER)
 	@PostMapping("/{reviewId}/report")
 	public ApiResponse<ReviewReportResponse> reportReview(
-		@RequestHeader("X-User-Id") Long userId,
-		@PathVariable UUID reviewId
+		@PathVariable UUID reviewId,
+		@CurrentUser UserContext user
 	) {
-		ReviewReportResult result = reviewService.reportReview(userId, reviewId);
+		ReviewReportResult result = reviewService.reportReview(user.getUserId(), reviewId);
 		ReviewReportResponse response = ReviewReportResponse.from(result);
 
 		return ApiResponse.of(SuccessCode.OK, response);

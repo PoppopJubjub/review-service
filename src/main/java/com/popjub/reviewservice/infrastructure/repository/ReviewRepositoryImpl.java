@@ -48,4 +48,10 @@ public class ReviewRepositoryImpl implements ReviewRepository {
 	public void delete(Review review) {
 		reviewJpaRepository.delete(review);
 	}
+
+	@Override
+	public boolean existsByReservationId(UUID reservationId) {
+		return reviewJpaRepository.existsByReservationId(reservationId);
+	}
+
 }

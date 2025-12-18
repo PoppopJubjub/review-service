@@ -18,4 +18,6 @@ public interface ReviewJpaRepository extends JpaRepository<Review, UUID> {
 	Optional<Review> findByReviewIdAndUserId(UUID reviewId, Long userId);
 
 	Page<Review> findAllByStoreIdAndIsBlindFalse(UUID storeId, Pageable pageable);
+
+	boolean existsByReservationId(UUID reservationId);
 }
