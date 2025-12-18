@@ -13,7 +13,7 @@ import com.popjub.reviewservice.infrastructure.client.dto.ReservationValidateReq
 
 @FeignClient(name = "reservation-service")
 public interface ReservationClient {
-// dto로 넘겨주자
+
 	@PostMapping("/internal/reservations/validate")
 	String validateReservation(
 		@RequestBody ReservationValidateRequest request
