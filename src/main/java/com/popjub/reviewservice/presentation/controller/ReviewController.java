@@ -48,7 +48,7 @@ import com.popjub.reviewservice.presentation.dto.response.SearchReviewResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-//
+//git 확인하고 삭제
 @RestController
 @RequestMapping("/api/v1/reviews")
 @RequiredArgsConstructor
