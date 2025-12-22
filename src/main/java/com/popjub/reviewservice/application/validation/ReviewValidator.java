@@ -18,7 +18,9 @@ import com.popjub.reviewservice.exception.ReviewCustomException;
 import com.popjub.reviewservice.exception.ReviewErrorCode;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ReviewValidator {
@@ -34,7 +36,7 @@ public class ReviewValidator {
 			command.userId(),
 			command.storeId()
 		);
-
+		log.info("reservation status raw = [{}]", status);
 		ReviewableStatus reviewableStatus = ReviewableStatus.from(status);
 
 		if (!reviewableStatus.isReviewable()) {
