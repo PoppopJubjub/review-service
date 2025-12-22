@@ -21,7 +21,7 @@ public enum ReviewErrorCode implements BaseErrorCode {
 	CANNOT_REPORT_BLINDED_REVIEW("400:블라인드 처리된 리뷰는 신고할 수 없습니다.", HttpStatus.BAD_REQUEST),
 	INVALID_BLIND_STATE("400:이미 동일한 BLIND 상태입니다.", HttpStatus.BAD_REQUEST),
 	KAFKA_EVENT_PARSE_FAIL("400:Kafka 메시지 파싱 실패", HttpStatus.BAD_REQUEST),
-
+	INVALID_IMAGE_URL("400:허용되지 않은 이미지입니다.", HttpStatus.BAD_REQUEST),
 	// 403
 	REVIEW_NOT_ALLOWED_BEFORE_CHECKIN("403:체크인된 사용자만 리뷰 작성가능합니다.", HttpStatus.FORBIDDEN),
 	REVIEW_ACCESS_DENIED("403:리뷰에 접근할 권한이 없습니다.", HttpStatus.FORBIDDEN),
