@@ -20,7 +20,6 @@ jobs:
 
       - name: Build JAR
         run: ./gradlew clean build -x test
-        working-directory: review-service
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -34,7 +33,7 @@ jobs:
 
       - name: Build & Push Docker Image
         run: |
-          docker build -t review-service:latest ./review-service
+          docker build -t review-service:latest .
           docker tag review-service:latest ${{ secrets.ECR_URI }}:latest
           docker push ${{ secrets.ECR_URI }}:latest
 
