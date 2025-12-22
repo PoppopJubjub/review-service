@@ -1,3 +1,6 @@
+server:
+  port: 8080
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -12,14 +15,19 @@ spring:
       hibernate:
         show_sql: false
         format_sql: false
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
 
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:18080/eureka/
+      defaultZone: http://${EUREKA_HOST}:18080/eureka/
     register-with-eureka: true
     fetch-registry: true
 
-server:
-  port: 8080
+cloud:
+  aws:
+    region: ap-northeast-2
+    s3:
+      bucket: popjub-image-bucket
