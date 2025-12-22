@@ -3,8 +3,6 @@ name: review-service CI/CD
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - "review-service/**"
 
 jobs:
   build:
