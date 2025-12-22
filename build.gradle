@@ -38,6 +38,7 @@ dependencies {
 	//kafka
 	implementation 'org.springframework.kafka:spring-kafka'
 	//aws
+	implementation platform("software.amazon.awssdk:bom:2.25.62")
 	implementation 'software.amazon.awssdk:s3'
 	implementation 'software.amazon.awssdk:auth'
 

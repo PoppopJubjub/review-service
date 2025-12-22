@@ -8,9 +8,10 @@ public record CreateReviewRequest (
 	UUID reservationId,
 	UUID storeId,
 	Integer rating,
-	String content
+	String content,
+	String imageUrl
 ) {
-	public CreateReviewCommand toCommand(Long userId, String imageUrl) {
+	public CreateReviewCommand toCommand(Long userId) {
 		return new CreateReviewCommand(
 			reservationId,
 			userId,

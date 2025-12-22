@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,7 +35,9 @@ import com.popjub.reviewservice.application.dto.result.CreateReviewResult;
 import com.popjub.reviewservice.application.dto.result.DeleteReviewResult;
 import com.popjub.reviewservice.application.dto.result.ReviewReportResult;
 import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
+import com.popjub.reviewservice.application.service.ReviewPresignedService;
 import com.popjub.reviewservice.application.service.ReviewService;
+import com.popjub.reviewservice.application.service.ReviewPresignedService;
 import com.popjub.reviewservice.presentation.dto.request.AdminBlindRequest;
 import com.popjub.reviewservice.presentation.dto.request.CreateReviewRequest;
 import com.popjub.reviewservice.presentation.dto.response.AdminBlindResponse;
@@ -52,20 +55,28 @@ import lombok.RequiredArgsConstructor;
 public class ReviewController {
 
 	private final ReviewService reviewService;
+	private final ReviewPresignedService reviewPresignedService;
 
-	@PostMapping(consumes = "multipart/form-data")
+	@PostMapping
 	public ApiResponse<CreateReviewResponse> createReview(
 		@Valid @RequestBody CreateReviewRequest request,
-		@RequestPart(required = false) MultipartFile image,
 		@CurrentUser UserContext user
 	) {
 		CreateReviewResult result =
-			reviewService.createReview(request, image, user.getUserId());
+			reviewService.createReview(request, user.getUserId());
 
 		return ApiResponse.of(
 			SuccessCode.CREATED,
 			CreateReviewResponse.from(result)
 		);
+	}
+
+	@PostMapping("/presigned")
+	public ApiResponse<String> getPresignedUrl(
+		@RequestParam String fileName
+	) {
+		String url = reviewPresignedService.createPresignedUrl(fileName);
+		return ApiResponse.of(SuccessCode.OK, url);
 	}
 
 	@GetMapping
