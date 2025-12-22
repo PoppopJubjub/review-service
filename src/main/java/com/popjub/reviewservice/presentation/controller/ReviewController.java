@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.popjub.common.annotation.CurrentUser;
 import com.popjub.common.annotation.RoleCheck;
@@ -51,17 +53,19 @@ public class ReviewController {
 
 	private final ReviewService reviewService;
 
-	@PostMapping
+	@PostMapping(consumes = "multipart/form-data")
 	public ApiResponse<CreateReviewResponse> createReview(
 		@Valid @RequestBody CreateReviewRequest request,
+		@RequestPart(required = false) MultipartFile image,
 		@CurrentUser UserContext user
 	) {
-		CreateReviewCommand command = request.toCommand(user.getUserId());
+		CreateReviewResult result =
+			reviewService.createReview(request, image, user.getUserId());
 
-		CreateReviewResult result = reviewService.createReview(command);
-		CreateReviewResponse response = CreateReviewResponse.from(result);
-
-		return ApiResponse.of(SuccessCode.CREATED, response);
+		return ApiResponse.of(
+			SuccessCode.CREATED,
+			CreateReviewResponse.from(result)
+		);
 	}
 
 	@GetMapping
