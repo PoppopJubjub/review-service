@@ -42,3 +42,9 @@ eureka:
     instance:
       prefer-ip-address: true
       instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+cloud:
+  aws:
+    region: ap-northeast-2
+    s3:
+      bucket: popjub-image-bucket

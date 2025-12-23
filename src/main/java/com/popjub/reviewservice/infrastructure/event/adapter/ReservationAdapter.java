@@ -25,9 +25,12 @@ public class ReservationAdapter implements ReservationPort {
 		UUID storeId
 		) {
 		try {
-			return reservationClient.validateReservation(
+			String rawStatus = reservationClient.validateReservation(
 				new ReservationValidateRequest(reservationId, userId, storeId)
 			);
+
+			return normalizeStatus(rawStatus);
+
 		} catch (feign.FeignException.NotFound e) {
 			// 예약 자체가 없음
 			throw new ReviewCustomException(
@@ -44,6 +47,21 @@ public class ReservationAdapter implements ReservationPort {
 				ReviewErrorCode.REVIEW_NOT_ALLOWED_BY_RESERVATION_STATUS
 			);
 		}
+	}
+
+	private String normalizeStatus(String rawStatus) {
+		if (rawStatus == null) {
+			throw new ReviewCustomException(
+				ReviewErrorCode.REVIEW_NOT_ALLOWED_BY_RESERVATION_STATUS
+			);
+		}
+
+		// ["CHECKED_IN"] → CHECKED_IN
+		return rawStatus
+			.replace("[", "")
+			.replace("]", "")
+			.replace("\"", "")
+			.trim();
 	}
 
 }

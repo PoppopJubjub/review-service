@@ -15,6 +15,7 @@ import com.popjub.reviewservice.application.dto.result.DeleteReviewResult;
 import com.popjub.reviewservice.application.dto.result.ReviewReportResult;
 import com.popjub.reviewservice.application.dto.result.SearchReviewResult;
 import com.popjub.reviewservice.application.port.ReviewEventPort;
+import com.popjub.reviewservice.application.validation.ImageValidator;
 import com.popjub.reviewservice.application.validation.ReviewValidator;
 import com.popjub.reviewservice.domain.entity.Review;
 import com.popjub.reviewservice.domain.entity.ReviewReport;
@@ -23,10 +24,12 @@ import com.popjub.reviewservice.domain.repository.ReviewRepository;
 import com.popjub.reviewservice.exception.ReviewCustomException;
 import com.popjub.reviewservice.exception.ReviewErrorCode;
 import com.popjub.reviewservice.infrastructure.client.StoreClient;
+import com.popjub.reviewservice.presentation.dto.request.CreateReviewRequest;
 import com.popjub.reviewservice.presentation.dto.request.StoreRatingDeleteRequest;
 import com.popjub.reviewservice.presentation.dto.request.StoreRatingUpdateRequest;
 
 import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -41,7 +44,14 @@ public class ReviewService {
 	private final ReviewValidator reviewValidator;
 
 	@Transactional
-	public CreateReviewResult createReview(CreateReviewCommand command) {
+	public CreateReviewResult createReview (
+		CreateReviewRequest request,
+		Long userId
+	){
+
+		ImageValidator.validate(request.imageUrl());
+
+		CreateReviewCommand command = request.toCommand(userId);
 
 		reviewValidator.validateCreate(command);
 
